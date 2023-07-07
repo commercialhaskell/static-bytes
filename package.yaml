@@ -1,0 +1,40 @@
+name:        static-bytes
+version:     0.1.0
+synopsis:    A Haskell library providing types representing 8, 16, 32, 64 or 128
+             bytes of data.
+description: Please see the README on GitHub at <https://github.com/commercialhaskell/static-bytes#readme>
+category:    Data
+author:      Michael Snoyman
+maintainer:  Mike Pilgrem <public@pilgrem.com>
+copyright:   2018-2023 FP Complete
+license:     BSD3
+github:      commercialhaskell/static-bytes
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+dependencies:
+- base >= 4.12 && < 5
+- bytestring
+- memory
+- primitive
+- rio
+- vector
+
+ghc-options:
+- -Wall
+
+library:
+  source-dirs: src
+
+tests:
+  spec:
+    build-tools: hspec-discover
+    source-dirs: test
+    main: Spec.hs
+    dependencies:
+    - QuickCheck
+    - hspec
+    - static-bytes
+    - text
