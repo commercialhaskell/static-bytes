@@ -7,8 +7,8 @@ on:
     - main
   workflow_dispatch:
 
-# As of 7 July 2023, ubuntu-latest, windows-latest and macos-latest come
-# with Stack 2.11.1.
+# As of 19 October 2024, ubuntu-latest and windows-latest come with Stack 3.1.1.
+# macos-13 and macos-latest do not come with Haskell tools.
 
 jobs:
   build:
@@ -19,36 +19,45 @@ jobs:
       matrix:
         os:
         - ubuntu-latest
-        stack-yaml:
+        snapshot:
         - stack-ghc-8.10.7.yaml
         - stack-ghc-9.0.2.yaml
         - stack-ghc-9.2.8.yaml
-        - stack-ghc-9.4.5.yaml
-        - stack-ghc-9.6.2.yaml
+        - stack-ghc-9.4.7.yaml
+        - stack-ghc-9.6.6.yaml
+        - stack-ghc-9.8.2.yaml
+        - stack-ghc-9.10.1.yaml
         include:
-        - os: macos-latest
-          stack-yaml: stack-ghc-9.4.5.yaml
+        - os: macos-13 # x86_64
+          snapshot: stack-ghc-9.10.1.yaml
+        - os: macos-latest # AArch64
+          snapshot: stack-ghc-9.10.1.yaml
         - os: windows-latest
-          stack-yaml: stack-ghc-9.4.5.yaml
+          snapshot: stack-ghc-9.10.1.yaml
     steps:
     - name: Clone project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Cache dependencies on Unix-like OS
       if: startsWith(runner.os, 'Linux') || startsWith(runner.os, 'macOS')
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.stack
         key: ${{ runner.os }}-${{ matrix.stack-yaml }}
     - name: Cache dependencies on Windows
       if: startsWith(runner.os, 'Windows')
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
            ~\AppData\Roaming\stack
            ~\AppData\Local\Programs\stack
         key: ${{ runner.os }}-${{ matrix.stack-yaml }}
-    - name: Build
+    - name: Install dependencies and test
       shell: bash
       run: |
         set -ex
-        stack test --stack-yaml ${{ matrix.stack-yaml }} --haddock --no-haddock-deps
+        if [[ "${{ matrix.os }}" == "macos-13" || "${{ matrix.os }}" == "macos-latest" ]]
+        then
+          # macos-13 and macos-latest do not include Haskell tools as at 2024-10-19.
+          curl -sSL https://get.haskellstack.org/ | sh
+        fi
+        stack test --snapshot ${{ matrix.snapshot }} --haddock --no-haddock-deps

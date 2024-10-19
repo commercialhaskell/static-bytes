@@ -1,1 +1,5 @@
-resolver: lts-20.26 # GHC 9.2.8
+snapshot: lts-20.26 # GHC 9.2.8
+
+flags:
+  ansi-terminal:
+    win32-2-13-1: false
