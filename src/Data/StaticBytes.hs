@@ -23,8 +23,8 @@ module Data.StaticBytes
   , fromStatic
   ) where
 
-import           Data.Bits
-import           Data.ByteArray
+import           Data.Bits ( Bits (..) )
+import           Data.ByteArray ( ByteArrayAccess (..) )
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Internal as B
 import qualified Data.Primitive.ByteArray as BA
@@ -35,9 +35,9 @@ import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Storable as VS
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Unboxed.Base as VU
-import           Foreign.ForeignPtr
-import           Foreign.Ptr
-import           Foreign.Storable
+import           Foreign.ForeignPtr ( ForeignPtr, withForeignPtr )
+import           Foreign.Ptr ( Ptr, castPtr )
+import           Foreign.Storable ( Storable (..) )
 import           RIO hiding ( words )
 import           System.IO.Unsafe ( unsafePerformIO )
 
