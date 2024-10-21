@@ -38,6 +38,7 @@ import qualified Data.Vector.Unboxed.Base as VU
 import           Foreign.ForeignPtr ( ForeignPtr, withForeignPtr )
 import           Foreign.Ptr ( Ptr, castPtr )
 import           Foreign.Storable ( Storable (..) )
+import           GHC.ByteOrder ( ByteOrder (..), targetByteOrder )
 import           RIO hiding ( words )
 import           System.IO.Unsafe ( unsafePerformIO )
 
@@ -79,20 +80,23 @@ class DynamicBytes dbytes where
   lengthD :: dbytes -> Int
   -- Yeah, it looks terrible to use a list here, but fusion should kick in
   withPeekD :: dbytes -> ((Int -> IO Word64) -> IO a) -> IO a
+  -- ^ This assumes that the Word64 values are all little-endian.
   -- | May throw a runtime exception if invariants are violated!
   fromWordsD :: Int -> [Word64] -> dbytes
+  -- ^ This assumes that the Word64 values are all little-endian.
 
 fromWordsForeign ::
      (ForeignPtr a -> Int -> b)
   -> Int
   -> [Word64]
+     -- ^ The Word64 values are assumed to be little-endian.
   -> b
 fromWordsForeign wrapper len words0 = unsafePerformIO $ do
   fptr <- B.mallocByteString len
   withForeignPtr fptr $ \ptr -> do
     let loop _ [] = pure ()
         loop off (w:ws) = do
-          pokeElemOff (castPtr ptr) off w
+          pokeElemOff (castPtr ptr) off (fromLE64 w)
           loop (off + 1) ws
     loop 0 words0
   pure $ wrapper fptr len
@@ -100,6 +104,7 @@ fromWordsForeign wrapper len words0 = unsafePerformIO $ do
 withPeekForeign ::
      (ForeignPtr a, Int, Int)
   -> ((Int -> IO Word64) -> IO b)
+     -- ^ The Word64 values are assumed to be little-endian.
   -> IO b
 withPeekForeign (fptr, off, len) inner =
   withForeignPtr fptr $ \ptr -> do
@@ -113,7 +118,7 @@ withPeekForeign (fptr, off, len) inner =
                         let w64' = shiftL (fromIntegral w8) (i * 8) .|. w64
                         loop w64' (i + 1)
               loop 0 0
-          | otherwise = peekByteOff ptr (off + off')
+          | otherwise = toLE64 <$> peekByteOff ptr (off + off')
     inner f
 
 instance DynamicBytes B.ByteString where
@@ -133,7 +138,7 @@ instance word8 ~ Word8 => DynamicBytes (VP.Vector word8) where
     let loop _ [] =
           VP.Vector 0 len <$> BA.unsafeFreezeByteArray ba
         loop i (w:ws) = do
-          BA.writeByteArray ba i w
+          BA.writeByteArray ba i (fromLE64 w)
           loop (i + 1) ws
     loop 0 words0
   withPeekD (VP.Vector off len ba) inner = do
@@ -147,7 +152,8 @@ instance word8 ~ Word8 => DynamicBytes (VP.Vector word8) where
                         let w64' = shiftL (fromIntegral w8) (i * 8) .|. w64
                         loop w64' (i + 1)
               loop 0 0
-          | otherwise = pure $ BA.indexByteArray ba (off + (off' `div` 8))
+          | otherwise = pure $
+              toLE64 $ BA.indexByteArray ba (off + (off' `div` 8))
     inner f
 
 instance word8 ~ Word8 => DynamicBytes (VU.Vector word8) where
@@ -248,3 +254,13 @@ fromStatic ::
   => sbytes
   -> dbytes
 fromStatic = fromWordsD (lengthS (Nothing :: Maybe sbytes)) . ($ []) . toWordsS
+
+-- | Convert a 64 bit value in CPU endianess to little endian.
+toLE64 :: Word64 -> Word64
+toLE64 = case targetByteOrder of
+  BigEndian -> byteSwap64
+  LittleEndian -> id
+
+-- | Convert a little endian 64 bit value to CPU endianess.
+fromLE64 :: Word64 -> Word64
+fromLE64 = toLE64
