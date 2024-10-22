@@ -25,7 +25,7 @@ jobs:
         - stack-ghc-9.2.8.yaml
         - stack-ghc-9.4.7.yaml
         - stack-ghc-9.6.6.yaml
-        - stack-ghc-9.8.2.yaml
+        - stack-ghc-9.8.3.yaml
         - stack-ghc-9.10.1.yaml
         include:
         - os: macos-13 # x86_64
