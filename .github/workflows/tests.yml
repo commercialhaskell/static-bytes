@@ -7,8 +7,10 @@ on:
     - main
   workflow_dispatch:
 
-# As of 19 October 2024, ubuntu-latest and windows-latest come with Stack 3.1.1.
-# macos-13 and macos-latest do not come with Haskell tools.
+# As of 2026-06-30:
+# * ubuntu-latest comes with Stack 3.11.1 and GHC 9.14.1
+# * windows-latest comes with Stack 3.11.1 and GHC 9.14.1
+# * macos-latest does not come with Haskell tools
 
 jobs:
   build:
@@ -20,44 +22,41 @@ jobs:
         os:
         - ubuntu-latest
         snapshot:
-        - stack-ghc-8.10.7.yaml
-        - stack-ghc-9.0.2.yaml
-        - stack-ghc-9.2.8.yaml
-        - stack-ghc-9.4.7.yaml
-        - stack-ghc-9.6.6.yaml
-        - stack-ghc-9.8.3.yaml
-        - stack-ghc-9.10.1.yaml
+        - stack-ghc-8.6.5.yaml # The oldest GHC supported by Stack and package
+        - stack-ghc-9.10.3.yaml
+        - stack-ghc-9.12.4.yaml
+        - stack-ghc-9.14.1.yaml
         include:
-        - os: macos-13 # x86_64
-          snapshot: stack-ghc-9.10.1.yaml
         - os: macos-latest # AArch64
-          snapshot: stack-ghc-9.10.1.yaml
+          snapshot: stack-ghc-9.10.3.yaml
         - os: windows-latest
-          snapshot: stack-ghc-9.10.1.yaml
+          snapshot: stack-ghc-9.10.3.yaml
     steps:
     - name: Clone project
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Cache dependencies on Unix-like OS
       if: startsWith(runner.os, 'Linux') || startsWith(runner.os, 'macOS')
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.stack
-        key: ${{ runner.os }}-${{ matrix.stack-yaml }}
+        key: ${{ runner.os }}-${{ matrix.snapshot }}
     - name: Cache dependencies on Windows
       if: startsWith(runner.os, 'Windows')
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
            ~\AppData\Roaming\stack
            ~\AppData\Local\Programs\stack
-        key: ${{ runner.os }}-${{ matrix.stack-yaml }}
+        key: ${{ runner.os }}-${{ matrix.snapshot }}
     - name: Install dependencies and test
       shell: bash
       run: |
         set -ex
-        if [[ "${{ matrix.os }}" == "macos-13" || "${{ matrix.os }}" == "macos-latest" ]]
+        if [[ "${{ matrix.os }}" == "macos-latest" ]]
         then
-          # macos-13 and macos-latest do not include Haskell tools as at 2024-10-19.
+          # As at 2026-06-30:
+          #
+          # * macos-latest does not include Haskell tools.
           curl -sSL https://get.haskellstack.org/ | sh
         fi
         stack test --snapshot ${{ matrix.snapshot }} --haddock --no-haddock-deps

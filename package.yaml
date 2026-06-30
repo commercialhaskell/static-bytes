@@ -1,3 +1,5 @@
+spec-version: 0.36.0
+
 name:        static-bytes
 version:     0.1.0
 synopsis:    A Haskell library providing types representing 8, 16, 32, 64 or 128
