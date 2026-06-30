@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
 
@@ -28,8 +28,6 @@ source-repository head
 library
   exposed-modules:
       Data.StaticBytes
-  other-modules:
-      Paths_static_bytes
   hs-source-dirs:
       src
   ghc-options: -Wall
@@ -47,7 +45,6 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       Data.StaticBytesSpec
-      Paths_static_bytes
   hs-source-dirs:
       test
   ghc-options: -Wall
