@@ -22,7 +22,7 @@ jobs:
         os:
         - ubuntu-latest
         snapshot:
-        - stack-ghc-8.6.5.yaml # The oldest GHC supported by Stack and package
+        - stack-ghc-8.8.4.yaml # The oldest GHC supported by Stack and package
         - stack-ghc-9.10.3.yaml
         - stack-ghc-9.12.4.yaml
         - stack-ghc-9.14.1.yaml

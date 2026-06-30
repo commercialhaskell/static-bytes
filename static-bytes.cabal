@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           static-bytes
-version:        0.1.0
+version:        0.2.0
 synopsis:       A Haskell library providing types representing 8, 16, 32, 64 or 128 bytes of data.
 description:    Please see the README on GitHub at <https://github.com/commercialhaskell/static-bytes#readme>
 category:       Data
@@ -32,10 +32,10 @@ library
       src
   ghc-options: -Wall
   build-depends:
-      base >=4.12 && <5
+      base >=4.13 && <5
     , bytestring
-    , memory
     , primitive
+    , ram
     , rio
     , vector
   default-language: Haskell2010
@@ -52,11 +52,11 @@ test-suite spec
       hspec-discover:hspec-discover
   build-depends:
       QuickCheck
-    , base >=4.12 && <5
+    , base >=4.13 && <5
     , bytestring
     , hspec
-    , memory
     , primitive
+    , ram
     , rio
     , static-bytes
     , text
