@@ -1,7 +1,7 @@
 spec-version: 0.36.0
 
 name:        static-bytes
-version:     0.1.0
+version:     0.2.0
 synopsis:    A Haskell library providing types representing 8, 16, 32, 64 or 128
              bytes of data.
 description: Please see the README on GitHub at <https://github.com/commercialhaskell/static-bytes#readme>
@@ -17,10 +17,10 @@ extra-source-files:
 - CHANGELOG.md
 
 dependencies:
-- base >= 4.12 && < 5
+- base >= 4.13 && < 5
 - bytestring
-- memory
 - primitive
+- ram
 - rio
 - vector
 

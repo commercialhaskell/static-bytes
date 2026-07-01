@@ -28,7 +28,7 @@ import           Data.ByteArray ( ByteArrayAccess (..) )
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Internal as B
 import qualified Data.Primitive.ByteArray as BA
-#if MIN_VERSION_GLASGOW_HASKELL(9,4,1,0)
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,1,0) && !MIN_VERSION_rio(0,1,23)
 import           Data.Type.Equality ( type (~) )
 #endif
 import qualified Data.Vector.Primitive as VP
@@ -70,7 +70,7 @@ data Bytes128 = Bytes128 !Bytes64 !Bytes64
 data StaticBytesException
   = NotEnoughBytes
   | TooManyBytes
-  deriving (Eq, Show, Typeable)
+  deriving (Eq, Show)
 
 instance Exception StaticBytesException
 
